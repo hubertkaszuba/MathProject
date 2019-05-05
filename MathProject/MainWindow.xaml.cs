@@ -78,7 +78,11 @@ namespace MathProject
 
         private void calculateBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (this.Model.Title == firstFunctionName)
+            if(this.Model == null)
+            {
+                MessageBox.Show("Wybierz funkcje");
+            }
+            else if (this.Model.Title == firstFunctionName)
             {
                 double beginningVal;
                 double endVal;
@@ -123,7 +127,6 @@ namespace MathProject
                 {
                     MessageBox.Show("Niepoprawne dane");
                 }
-
             }
             else if(this.Model.Title == secondFunctionName)
             {
@@ -170,11 +173,6 @@ namespace MathProject
                     MessageBox.Show("Niepoprawne dane");
                 }
             }
-            else
-            {
-                MessageBox.Show("Wybierz funkcje");
-            }
-
         }
     }
 }
