@@ -91,31 +91,34 @@ namespace MathProject
                 if(Double.TryParse(this.beginningOfTheCompartment.Text, out beginningVal) && Double.TryParse(this.endOfTheCompartment.Text, out endVal) && Double.TryParse(this.approximation.Text, out precision))
                 {
                     var functionValBeginning = firstFunction(beginningVal);
+                    var functionValEnd = firstFunction(endVal);
                     var secDerFunctionVal = secondaryDerivateFirstFunction();
                     List<DataGridObjects> approximations = new List<DataGridObjects>();
-                    if ((functionValBeginning * secDerFunctionVal) > 0)
+                    if((functionValBeginning * functionValEnd) < 0)
                     {
-                        approximations.Add(new DataGridObjects { StepNumber = 1, Value = beginningVal });
-                        approximations.Add(new DataGridObjects { StepNumber = 2, Value = (approximations[0].Value - (firstFunction(approximations[0].Value) / derivedFirstFunction(approximations[0].Value))) });
-                        int i = 2;
-                        while(Math.Abs((approximations[i-2].Value - approximations[i-1].Value)) >= precision)
+                        if ((functionValBeginning * secDerFunctionVal) > 0)
                         {
-                            approximations.Add(new DataGridObjects { StepNumber = i + 1, Value = (approximations[i - 1].Value - (firstFunction(approximations[i - 1].Value) / derivedFirstFunction(approximations[i - 1].Value))) });
-                            i++;
+                            approximations.Add(new DataGridObjects { StepNumber = 1, Value = beginningVal });
+                            approximations.Add(new DataGridObjects { StepNumber = 2, Value = (approximations[0].Value - (firstFunction(approximations[0].Value) / derivedFirstFunction(approximations[0].Value))) });
+                            int i = 2;
+                            while ((Math.Abs((approximations[i - 2].Value - approximations[i - 1].Value)) >= precision) && (i < 100))
+                            {
+                                approximations.Add(new DataGridObjects { StepNumber = i + 1, Value = (approximations[i - 1].Value - (firstFunction(approximations[i - 1].Value) / derivedFirstFunction(approximations[i - 1].Value))) });
+                                i++;
+                            }
                         }
-                    }
-                    functionValBeginning = firstFunction(endVal);
-                    if((functionValBeginning * secDerFunctionVal) > 0)
-                    {
-                        approximations.Add(new DataGridObjects { StepNumber = 1, Value = endVal });
-                        approximations.Add(new DataGridObjects { StepNumber = 2, Value = (approximations[0].Value - (firstFunction(approximations[0].Value) / derivedFirstFunction(approximations[0].Value))) });
-                        int i = 2;
-                        while (Math.Abs((approximations[i - 2].Value - approximations[i - 1].Value)) >= precision)
+                        else
                         {
-                            approximations.Add(new DataGridObjects { StepNumber = i + 1, Value = (approximations[i - 1].Value - (firstFunction(approximations[i - 1].Value) / derivedFirstFunction(approximations[i - 1].Value))) });
-                            i++;
-                        }
+                            approximations.Add(new DataGridObjects { StepNumber = 1, Value = endVal });
+                            approximations.Add(new DataGridObjects { StepNumber = 2, Value = (approximations[0].Value - (firstFunction(approximations[0].Value) / derivedFirstFunction(approximations[0].Value))) });
+                            int i = 2;
+                            while ((Math.Abs((approximations[i - 2].Value - approximations[i - 1].Value)) >= precision) && (i < 100))
+                            {
+                                approximations.Add(new DataGridObjects { StepNumber = i + 1, Value = (approximations[i - 1].Value - (firstFunction(approximations[i - 1].Value) / derivedFirstFunction(approximations[i - 1].Value))) });
+                                i++;
+                            }
 
+                        }
                     }
                     else
                     {
@@ -137,29 +140,32 @@ namespace MathProject
                 if (Double.TryParse(this.beginningOfTheCompartment.Text, out beginningVal) && Double.TryParse(this.endOfTheCompartment.Text, out endVal) && Double.TryParse(this.approximation.Text, out precision))
                 {
                     var functionValBeginning = secondFunction(beginningVal);
+                    var functionValEnd = secondFunction(endVal);
                     var secDerFunctionVal = secondaryDerivateSecondFunction(beginningVal);
                     List<DataGridObjects> approximations = new List<DataGridObjects>();
-                    if ((functionValBeginning * secDerFunctionVal) > 0)
+                    if ((functionValBeginning * functionValEnd) < 0)
                     {
-                        approximations.Add(new DataGridObjects { StepNumber = 1, Value = beginningVal });
-                        approximations.Add(new DataGridObjects { StepNumber = 2, Value = (approximations[0].Value - (secondFunction(approximations[0].Value) / derivedSecondFunction(approximations[0].Value))) });
-                        int i = 2;
-                        while (Math.Abs((approximations[i - 2].Value - approximations[i - 1].Value)) >= precision)
+                        if ((functionValBeginning * secDerFunctionVal) > 0)
                         {
-                            approximations.Add(new DataGridObjects { StepNumber = i + 1, Value = (approximations[i - 1].Value - (secondFunction(approximations[i - 1].Value) / derivedSecondFunction(approximations[i - 1].Value))) });
-                            i++;
+                            approximations.Add(new DataGridObjects { StepNumber = 1, Value = beginningVal });
+                            approximations.Add(new DataGridObjects { StepNumber = 2, Value = (approximations[0].Value - (secondFunction(approximations[0].Value) / derivedSecondFunction(approximations[0].Value))) });
+                            int i = 2;
+                            while ((Math.Abs((approximations[i - 2].Value - approximations[i - 1].Value)) >= precision) && (i < 100))
+                            {
+                                approximations.Add(new DataGridObjects { StepNumber = i + 1, Value = (approximations[i - 1].Value - (secondFunction(approximations[i - 1].Value) / derivedSecondFunction(approximations[i - 1].Value))) });
+                                i++;
+                            }
                         }
-                    }
-                    functionValBeginning = secondFunction(endVal);
-                    if ((functionValBeginning * secDerFunctionVal) > 0)
-                    {
-                        approximations.Add(new DataGridObjects { StepNumber = 1, Value = endVal });
-                        approximations.Add(new DataGridObjects { StepNumber = 2, Value = (approximations[0].Value - (secondFunction(approximations[0].Value) / derivedSecondFunction(approximations[0].Value))) });
-                        int i = 2;
-                        while (Math.Abs((approximations[i - 2].Value - approximations[i - 1].Value)) >= precision)
+                        else
                         {
-                            approximations.Add(new DataGridObjects { StepNumber = i + 1, Value = (approximations[i - 1].Value - (secondFunction(approximations[i - 1].Value) / derivedSecondFunction(approximations[i - 1].Value))) });
-                            i++;
+                            approximations.Add(new DataGridObjects { StepNumber = 1, Value = endVal });
+                            approximations.Add(new DataGridObjects { StepNumber = 2, Value = (approximations[0].Value - (secondFunction(approximations[0].Value) / derivedSecondFunction(approximations[0].Value))) });
+                            int i = 2;
+                            while ((Math.Abs((approximations[i - 2].Value - approximations[i - 1].Value))) >= precision && (i < 100))
+                            {
+                                approximations.Add(new DataGridObjects { StepNumber = i + 1, Value = (approximations[i - 1].Value - (secondFunction(approximations[i - 1].Value) / derivedSecondFunction(approximations[i - 1].Value))) });
+                                i++;
+                            }
                         }
                     }
                     else
