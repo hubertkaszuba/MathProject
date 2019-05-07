@@ -26,7 +26,7 @@ namespace MathProject
         public PlotModel Model;
         private const string firstFunctionName = "x^2-2x-1";
         private const string secondFunctionName = "x^3-2x";
-
+        private List<double> polynomial;
         public MainWindow()
         {
             InitializeComponent();
@@ -179,6 +179,95 @@ namespace MathProject
                     MessageBox.Show("Niepoprawne dane");
                 }
             }
+        }
+
+        private void degreeOfPolynomial_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            int degree;
+            for (int i = 0; i < this.stackPanel.Children.Capacity / 2; i++)
+                this.stackPanel.UnregisterName("a" + i);
+            this.stackPanel.Children.Clear();
+            this.stackPanel.Width = 240;
+            if (int.TryParse(this.degreeOfPolynomial.Text, out degree))
+            {
+                for(int i = 0; i < degree; i++)
+                {
+                    TextBox textBox = new TextBox();
+                    textBox.Text = "";
+                    textBox.Width = 30;
+                    textBox.Height = 20;
+                    textBox.Margin = new Thickness(0,0, 0, 5);
+                    textBox.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+                    textBox.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+                    textBox.Name = "a" + i;
+                    this.stackPanel.RegisterName(textBox.Name, textBox);
+                    Label label = new Label();
+                    label.Content = "a" + i;
+                    label.Height = 30;
+                    label.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
+                    label.VerticalAlignment = System.Windows.VerticalAlignment.Top;
+
+                    this.stackPanel.Children.Add(textBox);
+                    this.stackPanel.Children.Add(label);
+                    if (i >= 4)
+                    {
+                        this.stackPanel.Width = this.stackPanel.Width + 58;
+                    }
+
+                }
+            }
+        }
+
+        private void generateModel_Click(object sender, RoutedEventArgs e)
+        {
+            double[] coeff = new double[this.stackPanel.Children.Capacity/2];
+            int j = 0;
+            bool isValid = true;
+
+            for(int i = 0; i < coeff.Length; i++)
+            {
+                double tmp;
+                TextBox tmpTxt = (TextBox)this.stackPanel.FindName("a" + i);
+                if(!Double.TryParse(tmpTxt.Text, out tmp))
+                {
+                    isValid = false;
+                    break;
+                }
+            }
+            if(isValid)
+            {
+                for (int i = 0; i < coeff.Length; i++)
+                {
+                    TextBox tmpTxt = (TextBox)this.stackPanel.FindName("a" + i);
+                    coeff[i] = Double.Parse(tmpTxt.Text);
+                    j++;
+                }
+                Func<double, double> func = CreatePolynomialFunction(coeff);
+                this.Model = new PlotModel { Title = firstFunctionName, PlotType = PlotType.XY };
+                this.Model.Series.Add(new FunctionSeries(func, -5, 5, 0.1, firstFunctionName));
+                this.FunctionView.Model = this.Model;
+            }
+            else
+            {
+                MessageBox.Show("Niepoprawne współczynniki");
+            }
+
+        }
+
+        public static Func<double, double> CreatePolynomialFunction(params double[] coeff)
+        {
+            if (coeff == null) throw new ArgumentNullException("coeff");
+            return x =>
+            {
+                double sum = 0.0;
+                double xPower = 1;
+                for (int power = 0; power < coeff.Length; power += 1)
+                {
+                    sum += xPower * coeff[power];
+                    xPower *= x;
+                }
+                return sum;
+            };
         }
     }
 }
