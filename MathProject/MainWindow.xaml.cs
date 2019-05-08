@@ -169,7 +169,7 @@ namespace MathProject
         private void degreeOfPolynomial_TextChanged(object sender, TextChangedEventArgs e)
         {
             int degree;
-            for (int i = 0; i < this.stackPanel.Children.Capacity / 2; i++)
+            for (int i = 0; i < this.stackPanel.Children.Count / 2; i++)
                 this.stackPanel.UnregisterName("a" + i);
             this.stackPanel.Children.Clear();
             this.stackPanel.Width = 240;
