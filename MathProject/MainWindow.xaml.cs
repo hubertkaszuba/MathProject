@@ -32,21 +32,6 @@ namespace MathProject
             InitializeComponent();
         }
 
-        public double firstFunction(double x)
-        {
-            return (Math.Pow(x, 2) - (2 * x) - 1);
-        }
-
-        public double derivedFirstFunction(double x)
-        {
-            return (2 * x - 2);
-        }
-
-        public double secondaryDerivateFirstFunction()
-        {
-            return 2;
-        }
-
         public double secondFunction(double x)
         {
             return (Math.Pow(x, 3) - (2 * x));
@@ -92,32 +77,32 @@ namespace MathProject
                 {
                     var functionValBeginning = firstFunction(beginningVal);
                     var functionValEnd = firstFunction(endVal);
-                    var secDerFunctionVal = secondaryDerivateFirstFunction();
+                    var secDerFunctionValBeginning = secondaryDerivatePolynomial(beginningVal);
+                    var secDerFunctionValEnd = secondaryDerivatePolynomial(endVal);
                     List<DataGridObjects> approximations = new List<DataGridObjects>();
                     if((functionValBeginning * functionValEnd) < 0)
                     {
-                        if ((functionValBeginning * secDerFunctionVal) > 0)
+                        if ((functionValBeginning * secDerFunctionValBeginning) > 0)
                         {
                             approximations.Add(new DataGridObjects { StepNumber = 1, Value = beginningVal });
-                            approximations.Add(new DataGridObjects { StepNumber = 2, Value = (approximations[0].Value - (firstFunction(approximations[0].Value) / derivedFirstFunction(approximations[0].Value))) });
+                            approximations.Add(new DataGridObjects { StepNumber = 2, Value = (approximations[0].Value - (firstFunction(approximations[0].Value) / derivedPolynomial(approximations[0].Value))) });
                             int i = 2;
                             while ((Math.Abs((approximations[i - 2].Value - approximations[i - 1].Value)) >= precision) && (i < 100))
                             {
-                                approximations.Add(new DataGridObjects { StepNumber = i + 1, Value = (approximations[i - 1].Value - (firstFunction(approximations[i - 1].Value) / derivedFirstFunction(approximations[i - 1].Value))) });
+                                approximations.Add(new DataGridObjects { StepNumber = i + 1, Value = (approximations[i - 1].Value - (firstFunction(approximations[i - 1].Value) / derivedPolynomial(approximations[i - 1].Value))) });
                                 i++;
                             }
                         }
                         else
                         {
                             approximations.Add(new DataGridObjects { StepNumber = 1, Value = endVal });
-                            approximations.Add(new DataGridObjects { StepNumber = 2, Value = (approximations[0].Value - (firstFunction(approximations[0].Value) / derivedFirstFunction(approximations[0].Value))) });
+                            approximations.Add(new DataGridObjects { StepNumber = 2, Value = (approximations[0].Value - (firstFunction(approximations[0].Value) / derivedPolynomial(approximations[0].Value))) });
                             int i = 2;
                             while ((Math.Abs((approximations[i - 2].Value - approximations[i - 1].Value)) >= precision) && (i < 100))
                             {
-                                approximations.Add(new DataGridObjects { StepNumber = i + 1, Value = (approximations[i - 1].Value - (firstFunction(approximations[i - 1].Value) / derivedFirstFunction(approximations[i - 1].Value))) });
+                                approximations.Add(new DataGridObjects { StepNumber = i + 1, Value = (approximations[i - 1].Value - (firstFunction(approximations[i - 1].Value) / derivedPolynomial(approximations[i - 1].Value))) });
                                 i++;
                             }
-
                         }
                     }
                     else
@@ -220,7 +205,7 @@ namespace MathProject
 
         private void generateModel_Click(object sender, RoutedEventArgs e)
         {
-            double[] coeff = new double[this.stackPanel.Children.Capacity/2];
+            double[] coeff = new double[this.stackPanel.Children.Count/2];
             int j = 0;
             bool isValid = true;
 
@@ -252,6 +237,116 @@ namespace MathProject
                 MessageBox.Show("Niepoprawne współczynniki");
             }
 
+        }
+
+        public double firstFunction(double x)
+        {
+            double[] coeff = new double[this.stackPanel.Children.Count / 2];
+            int j = 0;
+            bool isValid = true;
+
+            for (int i = 0; i < coeff.Length; i++)
+            {
+                double tmp;
+                TextBox tmpTxt = (TextBox)this.stackPanel.FindName("a" + i);
+                if (!Double.TryParse(tmpTxt.Text, out tmp))
+                {
+                    isValid = false;
+                    break;
+                }
+            }
+            if (isValid)
+            {
+                for (int i = 0; i < coeff.Length; i++)
+                {
+                    TextBox tmpTxt = (TextBox)this.stackPanel.FindName("a" + i);
+                    coeff[i] = Double.Parse(tmpTxt.Text);
+                    j++;
+                }
+                Func<double, double> func = CreatePolynomialFunction(coeff);
+                return func.Invoke(x);
+            }
+            else
+            {
+                MessageBox.Show("Niepoprawne współczynniki");
+                return 0.0;
+            }
+        }
+
+        public double derivedPolynomial(double x)
+        {
+
+            double[] coeff = new double[(this.stackPanel.Children.Count / 2) - 1];
+            int j = 0;
+            bool isValid = true;
+
+            for (int i = 0; i < coeff.Length; i++)
+            {
+                double tmp;
+                TextBox tmpTxt = (TextBox)this.stackPanel.FindName("a" + i);
+                if (!Double.TryParse(tmpTxt.Text, out tmp))
+                {
+                    isValid = false;
+                    break;
+                }
+            }
+            if (isValid)
+            {
+                for (int i = 1; i <= coeff.Length; i++)
+                {
+                    TextBox tmpTxt = (TextBox)this.stackPanel.FindName("a" + i);
+                    coeff[j] = Double.Parse(tmpTxt.Text) * i;
+                    j++;
+                }
+                Func<double, double> func = CreatePolynomialFunction(coeff);
+                return func.Invoke(x);
+            }
+            else
+            {
+                MessageBox.Show("Niepoprawne współczynniki");
+                return 0.0;
+            }
+        }
+
+        public double secondaryDerivatePolynomial(double x)
+        {
+            double[] coeff = new double[(this.stackPanel.Children.Count / 2) - 1];
+            int j = 0;
+            bool isValid = true;
+
+            for (int i = 0; i < coeff.Length; i++)
+            {
+                double tmp;
+                TextBox tmpTxt = (TextBox)this.stackPanel.FindName("a" + i);
+                if (!Double.TryParse(tmpTxt.Text, out tmp))
+                {
+                    isValid = false;
+                    break;
+                }
+            }
+            if (isValid)
+            {
+                for (int i = 1; i <= coeff.Length; i++)
+                {
+                    TextBox tmpTxt = (TextBox)this.stackPanel.FindName("a" + i);
+                    coeff[j] = Double.Parse(tmpTxt.Text) * i;
+                    j++;
+                }
+                j = 0;
+                double[] coeffSecDer = new double[coeff.Length - 1];
+                for (int i = 1; i <= coeffSecDer.Length; i++)
+                {
+                    coeffSecDer[j] = coeff[i] * i;
+                    j++;
+                }
+                Func<double, double> func = CreatePolynomialFunction(coeffSecDer);
+                return func.Invoke(x);
+            }
+            else
+            {
+                MessageBox.Show("Niepoprawne współczynniki");
+                return 0.0;
+            }
         }
 
         public static Func<double, double> CreatePolynomialFunction(params double[] coeff)
