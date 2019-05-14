@@ -1,4 +1,5 @@
 ﻿using OxyPlot;
+using OxyPlot.Axes;
 using OxyPlot.Series;
 using System;
 using System.Collections.Generic;
@@ -26,10 +27,17 @@ namespace MathProject
         public PlotModel Model;
         private const string firstFunctionName = "x^2-2x-1";
         private const string secondFunctionName = "x^3-2x";
-        private List<double> polynomial;
+        public IList<DataPoint> Points { get; private set; }
+
         public MainWindow()
         {
             InitializeComponent();
+            this.stackPanel.Visibility = Visibility.Hidden;
+            this.generateModel.Visibility = Visibility.Hidden;
+            this.degreeOfPolynomial.Visibility = Visibility.Hidden;
+            this.degreeOfPolynomialLbl.Visibility = Visibility.Hidden;
+            this.scrollViewer.Visibility = Visibility.Hidden;
+            this.Points = new List<DataPoint>();
         }
 
         public double secondFunction(double x)
@@ -49,15 +57,26 @@ namespace MathProject
 
         private void firstFunctionBtn_Click(object sender, RoutedEventArgs e)
         {
-            this.Model = new PlotModel { Title = firstFunctionName, PlotType = PlotType.XY };
-            this.Model.Series.Add(new FunctionSeries((x) => (Math.Pow(x, 2) - (2 * x) - 1), -5, 5, 0.1, firstFunctionName));
-            this.FunctionView.Model = this.Model;
+            this.stackPanel.Visibility = Visibility.Visible;
+            this.generateModel.Visibility = Visibility.Visible;
+            this.degreeOfPolynomial.Visibility = Visibility.Visible;
+            this.degreeOfPolynomialLbl.Visibility = Visibility.Visible;
+            this.scrollViewer.Visibility = Visibility.Visible;
         }
 
         private void Test2_Click(object sender, RoutedEventArgs e)
         {
+            this.stackPanel.Visibility = Visibility.Hidden;
+            this.generateModel.Visibility = Visibility.Hidden;
+            this.degreeOfPolynomial.Visibility = Visibility.Hidden;
+            this.degreeOfPolynomialLbl.Visibility = Visibility.Hidden;
+            this.scrollViewer.Visibility = Visibility.Hidden;
+
             this.Model = new PlotModel { Title = secondFunctionName, PlotType = PlotType.XY };
             this.Model.Series.Add(new FunctionSeries((x) => (Math.Pow(x, 3) - (2 * x)), -5, 5, 0.1, secondFunctionName));
+            this.Model.Axes.Add(new OxyPlot.Axes.LinearAxis { Position = OxyPlot.Axes.AxisPosition.Bottom, ExtraGridlines = new double[] { 0 }, ExtraGridlineThickness = 1, ExtraGridlineColor = OxyColors.Black, });
+            this.Model.Axes.Add(new OxyPlot.Axes.LinearAxis { Position = OxyPlot.Axes.AxisPosition.Left, ExtraGridlines = new double[] { 0 }, ExtraGridlineThickness = 1, ExtraGridlineColor = OxyColors.Black, });
+            this.Model.InvalidatePlot(true);
             this.FunctionView.Model = this.Model;
         }
 
@@ -67,7 +86,7 @@ namespace MathProject
             {
                 MessageBox.Show("Wybierz funkcje");
             }
-            else if (this.Model.Title == firstFunctionName)
+            else if (this.Model.Title != secondFunctionName && this.Model != null)
             {
                 double beginningVal;
                 double endVal;
@@ -102,8 +121,24 @@ namespace MathProject
                             {
                                 approximations.Add(new DataGridObjects { StepNumber = i + 1, Value = (approximations[i - 1].Value - (firstFunction(approximations[i - 1].Value) / derivedPolynomial(approximations[i - 1].Value))) });
                                 i++;
-                            }
+                            }                                
                         }
+                        int k = 0;
+                        foreach (var p in approximations)
+                        {
+                            var s1 = new LineSeries();
+
+                            s1.Color = OxyColors.LightBlue;
+                            s1.MarkerFill = OxyColors.Blue;
+                            s1.MarkerType = OxyPlot.MarkerType.Circle;
+                            s1.IsVisible = true;
+                            s1.Points.Add(new DataPoint(p.Value, 0));
+                            s1.ToolTip = "x" + k;
+                            s1.LabelFormatString = "x" + k;
+                            this.Model.Series.Add(s1);
+                            k++;
+                        }
+                        this.Model.InvalidatePlot(true);
                     }
                     else
                     {
@@ -152,6 +187,22 @@ namespace MathProject
                                 i++;
                             }
                         }
+                        int k = 0;
+                        foreach (var p in approximations)
+                        {
+                            var s1 = new LineSeries();
+
+                            s1.Color = OxyColors.LightBlue;
+                            s1.MarkerFill = OxyColors.Blue;
+                            s1.MarkerType = OxyPlot.MarkerType.Circle;
+                            s1.IsVisible = true;
+                            s1.Points.Add(new DataPoint(p.Value, 0));
+                            s1.ToolTip = "x" + k;
+                            s1.LabelFormatString = "x" + k;
+                            this.Model.Series.Add(s1);
+                            k++;
+                        }
+                        this.Model.InvalidatePlot(true);
                     }
                     else
                     {
@@ -164,6 +215,10 @@ namespace MathProject
                     MessageBox.Show("Niepoprawne dane");
                 }
             }
+            else
+            {
+                MessageBox.Show("Wybierz funkcje");
+            }
         }
 
         private void degreeOfPolynomial_TextChanged(object sender, TextChangedEventArgs e)
@@ -175,7 +230,7 @@ namespace MathProject
             this.stackPanel.Width = 240;
             if (int.TryParse(this.degreeOfPolynomial.Text, out degree))
             {
-                for(int i = 0; i < degree; i++)
+                for(int i = degree; i >=0 ; i--)
                 {
                     TextBox textBox = new TextBox();
                     textBox.Text = "";
@@ -187,7 +242,7 @@ namespace MathProject
                     textBox.Name = "a" + i;
                     this.stackPanel.RegisterName(textBox.Name, textBox);
                     Label label = new Label();
-                    label.Content = "a" + i;
+                    label.Content = "x^" + i;
                     label.Height = 30;
                     label.HorizontalAlignment = System.Windows.HorizontalAlignment.Left;
                     label.VerticalAlignment = System.Windows.VerticalAlignment.Top;
@@ -227,9 +282,46 @@ namespace MathProject
                     coeff[i] = Double.Parse(tmpTxt.Text);
                     j++;
                 }
+                //coeff = coeff.Reverse().ToArray();
+                string name = string.Empty;
+                for (int i = coeff.Length-1; i >= 0; i--)
+                {
+                    if(i != 0 && i != 1)
+                    {
+                        if (coeff[i] != 1 && coeff[i] != 0 && coeff[i] != -1)
+                            name = String.Concat(name, String.Format("{0}x^{1}", coeff[i], i));
+                        else if (coeff[i] == 1)
+                            name = String.Concat(name, String.Format("x^{1}", coeff[i], i));
+                        else if (coeff[i] == -1)
+                            name = String.Concat(name, String.Format("-x^{1}", coeff[i], i));
+                    }
+                    else if(i == 1)
+                    {
+                        if (coeff[i] != 1 && coeff[i] != 0)
+                            name = String.Concat(name, String.Format("{0}x", coeff[i]));
+                        else if (coeff[i] == 1)
+                            name = String.Concat(name, "x");
+                        else if (coeff[i] == -1)
+                            name = String.Concat(name,"-x");
+                    }
+                    else
+                    {
+                        if (coeff[i] != 0)
+                            name = String.Concat(name, String.Format("{0}", coeff[i]));
+                    }
+
+                    if (coeff[i] != 0 && i != 0 && coeff[i-1] > 0)
+                    {
+                        name = String.Concat(name, '+');
+                    }
+
+                }
+
                 Func<double, double> func = CreatePolynomialFunction(coeff);
-                this.Model = new PlotModel { Title = firstFunctionName, PlotType = PlotType.XY };
-                this.Model.Series.Add(new FunctionSeries(func, -5, 5, 0.1, firstFunctionName));
+                this.Model = new PlotModel { Title = name, PlotType = PlotType.XY };
+                this.Model.Series.Add(new FunctionSeries(func, -5, 5, 0.1, name));
+                this.Model.Axes.Add(new OxyPlot.Axes.LinearAxis { Position = OxyPlot.Axes.AxisPosition.Bottom, ExtraGridlines = new double[] { 0 }, ExtraGridlineThickness = 1, ExtraGridlineColor = OxyColors.Black, });
+                this.Model.Axes.Add(new OxyPlot.Axes.LinearAxis { Position = OxyPlot.Axes.AxisPosition.Left, ExtraGridlines = new double[] { 0 }, ExtraGridlineThickness = 1, ExtraGridlineColor = OxyColors.Black, });
                 this.FunctionView.Model = this.Model;
             }
             else
@@ -263,8 +355,15 @@ namespace MathProject
                     coeff[i] = Double.Parse(tmpTxt.Text);
                     j++;
                 }
-                Func<double, double> func = CreatePolynomialFunction(coeff);
-                return func.Invoke(x);
+                //Func<double, double> func = CreatePolynomialFunction(coeff);
+                //return func.Invoke(x);
+                var coeffTmp = coeff.Reverse().ToList() ;
+                double result = coeffTmp[0];
+
+                for (int i = 1; i < coeffTmp.Count; i++)
+                    result = result * x + coeffTmp[i];
+
+                return result;
             }
             else
             {
@@ -298,8 +397,15 @@ namespace MathProject
                     coeff[j] = Double.Parse(tmpTxt.Text) * i;
                     j++;
                 }
-                Func<double, double> func = CreatePolynomialFunction(coeff);
-                return func.Invoke(x);
+                //Func<double, double> func = CreatePolynomialFunction(coeff);
+                //return func.Invoke(x);
+                var coeffTmp = coeff.Reverse().ToList();
+                double result = coeffTmp[0];
+
+                for (int i = 1; i < coeffTmp.Count; i++)
+                    result = result * x + coeffTmp[i];
+
+                return result;
             }
             else
             {
@@ -339,8 +445,15 @@ namespace MathProject
                     coeffSecDer[j] = coeff[i] * i;
                     j++;
                 }
-                Func<double, double> func = CreatePolynomialFunction(coeffSecDer);
-                return func.Invoke(x);
+                //Func<double, double> func = CreatePolynomialFunction(coeffSecDer);
+                //return func.Invoke(x);
+                var coeffTmp = coeffSecDer.Reverse().ToList();
+                double result = coeffTmp[0];
+
+                for (int i = 1; i < coeffTmp.Count; i++)
+                    result = result * x + coeffTmp[i];
+
+                return result;
             }
             else
             {
