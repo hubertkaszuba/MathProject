@@ -91,38 +91,83 @@ namespace MathProject
                 double beginningVal;
                 double endVal;
                 double precision;
+                string beginningTxt = this.beginningOfTheCompartment.Text;
+                string endTxt = this.endOfTheCompartment.Text;
+                string precisionTxt = this.approximation.Text;
 
-                if(Double.TryParse(this.beginningOfTheCompartment.Text, out beginningVal) && Double.TryParse(this.endOfTheCompartment.Text, out endVal) && Double.TryParse(this.approximation.Text, out precision))
+                if (beginningTxt.Contains('.'))
+                    beginningTxt = beginningTxt.Replace('.', ',');
+
+                if (endTxt.Contains('.'))
+                    endTxt = endTxt.Replace('.', ',');
+
+                if (precisionTxt.Contains('.'))
+                    precisionTxt = precisionTxt.Replace('.', ',');
+
+                if (Double.TryParse(beginningTxt, out beginningVal) && Double.TryParse(endTxt, out endVal) && Double.TryParse(precisionTxt, out precision))
                 {
                     var functionValBeginning = firstFunction(beginningVal);
                     var functionValEnd = firstFunction(endVal);
                     var secDerFunctionValBeginning = secondaryDerivatePolynomial(beginningVal);
                     var secDerFunctionValEnd = secondaryDerivatePolynomial(endVal);
                     List<DataGridObjects> approximations = new List<DataGridObjects>();
-                    if((functionValBeginning * functionValEnd) < 0)
+                    List<DataGridObjects> approximationsRegulaFalsi = new List<DataGridObjects>();
+                    int i = 0;
+                    if ((functionValBeginning * functionValEnd) < 0)
                     {
                         if ((functionValBeginning * secDerFunctionValBeginning) > 0)
                         {
-                            approximations.Add(new DataGridObjects { StepNumber = 1, Value = beginningVal });
-                            approximations.Add(new DataGridObjects { StepNumber = 2, Value = (approximations[0].Value - (firstFunction(approximations[0].Value) / derivedPolynomial(approximations[0].Value))) });
-                            int i = 2;
+                            approximations.Add(new DataGridObjects { StepNumber = 0, Value = beginningVal });
+                            approximations.Add(new DataGridObjects { StepNumber = 1, Value = (approximations[0].Value - (firstFunction(approximations[0].Value) / derivedPolynomial(approximations[0].Value))) });
+                            i = 2;
                             while ((Math.Abs((approximations[i - 2].Value - approximations[i - 1].Value)) >= precision) && (i < 100))
                             {
-                                approximations.Add(new DataGridObjects { StepNumber = i + 1, Value = (approximations[i - 1].Value - (firstFunction(approximations[i - 1].Value) / derivedPolynomial(approximations[i - 1].Value))) });
+                                approximations.Add(new DataGridObjects { StepNumber = i, Value = (approximations[i - 1].Value - (firstFunction(approximations[i - 1].Value) / derivedPolynomial(approximations[i - 1].Value))) });
                                 i++;
                             }
                         }
                         else
                         {
-                            approximations.Add(new DataGridObjects { StepNumber = 1, Value = endVal });
-                            approximations.Add(new DataGridObjects { StepNumber = 2, Value = (approximations[0].Value - (firstFunction(approximations[0].Value) / derivedPolynomial(approximations[0].Value))) });
-                            int i = 2;
+                            approximations.Add(new DataGridObjects { StepNumber = 0, Value = endVal });
+                            approximations.Add(new DataGridObjects { StepNumber = 1, Value = (approximations[0].Value - (firstFunction(approximations[0].Value) / derivedPolynomial(approximations[0].Value))) });
+                            i = 2;
                             while ((Math.Abs((approximations[i - 2].Value - approximations[i - 1].Value)) >= precision) && (i < 100))
                             {
-                                approximations.Add(new DataGridObjects { StepNumber = i + 1, Value = (approximations[i - 1].Value - (firstFunction(approximations[i - 1].Value) / derivedPolynomial(approximations[i - 1].Value))) });
+                                approximations.Add(new DataGridObjects { StepNumber = i, Value = (approximations[i - 1].Value - (firstFunction(approximations[i - 1].Value) / derivedPolynomial(approximations[i - 1].Value))) });
                                 i++;
                             }                                
                         }
+                        this.Model.InvalidatePlot(true);
+
+                        double a = beginningVal;
+                        double b = endVal;
+                        double x1 = a;
+                        double x0 = b;
+                        double fa = firstFunction(beginningVal);
+                        double fb = firstFunction(endVal);
+                        double f0;
+                        approximationsRegulaFalsi.Add(new DataGridObjects { StepNumber = 0, Value = b });
+                        approximationsRegulaFalsi.Add(new DataGridObjects { StepNumber = 1, Value = a });
+                        i = 2;
+                        while (Math.Abs(approximationsRegulaFalsi[i - 2].Value - approximationsRegulaFalsi[i - 1].Value) >= precision && (i < 100))
+                        {
+                            x1 = x0;
+                            x0 = a - firstFunction(a) * (b - a) / (fb - fa);
+                            f0 = firstFunction(x0);
+                            if (fa * f0 < 0)
+                            {
+                                b = x0;
+                                fb = f0;
+                            }
+                            else
+                            {
+                                a = x0;
+                                fa = f0;
+                            }
+                            approximationsRegulaFalsi.Add(new DataGridObjects { StepNumber = i, Value = x0 });
+                            i++;
+                        }
+
                         int k = 0;
                         foreach (var p in approximations)
                         {
@@ -133,8 +178,25 @@ namespace MathProject
                             s1.MarkerType = OxyPlot.MarkerType.Circle;
                             s1.IsVisible = true;
                             s1.Points.Add(new DataPoint(p.Value, 0));
-                            s1.ToolTip = "x" + k;
-                            s1.LabelFormatString = "x" + k;
+                            s1.ToolTip = "x" + p.StepNumber;
+                            s1.LabelFormatString = "x" + p.StepNumber;
+                            this.Model.Series.Add(s1);
+                            k++;
+                        }
+                        this.Model.InvalidatePlot(true);
+
+                        k = 0;
+                        foreach (var p in approximationsRegulaFalsi)
+                        {
+                            var s1 = new LineSeries();
+
+                            s1.Color = OxyColors.LightBlue;
+                            s1.MarkerFill = OxyColors.Red;
+                            s1.MarkerType = OxyPlot.MarkerType.Circle;
+                            s1.IsVisible = true;
+                            s1.Points.Add(new DataPoint(p.Value, 0));
+                            s1.ToolTip = "x" + p.StepNumber;
+                            s1.LabelFormatString = "x" + p.StepNumber;
                             this.Model.Series.Add(s1);
                             k++;
                         }
@@ -145,6 +207,7 @@ namespace MathProject
                         MessageBox.Show("Niepoprawny przedział");
                     }
                     this.results.ItemsSource = approximations;
+                    this.resultsRegulaFalsi.ItemsSource = approximationsRegulaFalsi;
                 }
                 else
                 {
@@ -156,37 +219,80 @@ namespace MathProject
                 double beginningVal;
                 double endVal;
                 double precision;
+                string beginningTxt = this.beginningOfTheCompartment.Text;
+                string endTxt = this.endOfTheCompartment.Text;
+                string precisionTxt = this.approximation.Text;
 
-                if (Double.TryParse(this.beginningOfTheCompartment.Text, out beginningVal) && Double.TryParse(this.endOfTheCompartment.Text, out endVal) && Double.TryParse(this.approximation.Text, out precision))
+                if (beginningTxt.Contains('.'))
+                    beginningTxt = beginningTxt.Replace('.', ',');
+
+                if (endTxt.Contains('.'))
+                    endTxt = endTxt.Replace('.', ',');
+
+                if (precisionTxt.Contains('.'))
+                    precisionTxt = precisionTxt.Replace('.', ',');
+
+                if (Double.TryParse(beginningTxt, out beginningVal) && Double.TryParse(endTxt, out endVal) && Double.TryParse(precisionTxt, out precision))
                 {
                     var functionValBeginning = secondFunction(beginningVal);
                     var functionValEnd = secondFunction(endVal);
                     var secDerFunctionVal = secondaryDerivateSecondFunction(beginningVal);
                     List<DataGridObjects> approximations = new List<DataGridObjects>();
+                    List<DataGridObjects> approximationsRegulaFalsi = new List<DataGridObjects>();
+                    int i = 0;
                     if ((functionValBeginning * functionValEnd) < 0)
                     {
                         if ((functionValBeginning * secDerFunctionVal) > 0)
                         {
-                            approximations.Add(new DataGridObjects { StepNumber = 1, Value = beginningVal });
-                            approximations.Add(new DataGridObjects { StepNumber = 2, Value = (approximations[0].Value - (secondFunction(approximations[0].Value) / derivedSecondFunction(approximations[0].Value))) });
-                            int i = 2;
+                            approximations.Add(new DataGridObjects { StepNumber = 0, Value = beginningVal });
+                            approximations.Add(new DataGridObjects { StepNumber = 1, Value = (approximations[0].Value - (secondFunction(approximations[0].Value) / derivedSecondFunction(approximations[0].Value))) });
+                            i = 2;
                             while ((Math.Abs((approximations[i - 2].Value - approximations[i - 1].Value)) >= precision) && (i < 100))
                             {
-                                approximations.Add(new DataGridObjects { StepNumber = i + 1, Value = (approximations[i - 1].Value - (secondFunction(approximations[i - 1].Value) / derivedSecondFunction(approximations[i - 1].Value))) });
+                                approximations.Add(new DataGridObjects { StepNumber = i, Value = (approximations[i - 1].Value - (secondFunction(approximations[i - 1].Value) / derivedSecondFunction(approximations[i - 1].Value))) });
                                 i++;
                             }
                         }
                         else
                         {
-                            approximations.Add(new DataGridObjects { StepNumber = 1, Value = endVal });
-                            approximations.Add(new DataGridObjects { StepNumber = 2, Value = (approximations[0].Value - (secondFunction(approximations[0].Value) / derivedSecondFunction(approximations[0].Value))) });
-                            int i = 2;
+                            approximations.Add(new DataGridObjects { StepNumber = 0, Value = endVal });
+                            approximations.Add(new DataGridObjects { StepNumber = 1, Value = (approximations[0].Value - (secondFunction(approximations[0].Value) / derivedSecondFunction(approximations[0].Value))) });
+                            i = 2;
                             while ((Math.Abs((approximations[i - 2].Value - approximations[i - 1].Value))) >= precision && (i < 100))
                             {
-                                approximations.Add(new DataGridObjects { StepNumber = i + 1, Value = (approximations[i - 1].Value - (secondFunction(approximations[i - 1].Value) / derivedSecondFunction(approximations[i - 1].Value))) });
+                                approximations.Add(new DataGridObjects { StepNumber = i, Value = (approximations[i - 1].Value - (secondFunction(approximations[i - 1].Value) / derivedSecondFunction(approximations[i - 1].Value))) });
                                 i++;
                             }
                         }
+                        double a = beginningVal;
+                        double b = endVal;
+                        double x1 = a;
+                        double x0 = b;
+                        double fa = secondFunction(beginningVal);
+                        double fb = secondFunction(endVal);
+                        double f0;
+                        approximationsRegulaFalsi.Add(new DataGridObjects { StepNumber = 0, Value = b });
+                        approximationsRegulaFalsi.Add(new DataGridObjects { StepNumber = 1, Value = a });
+                        i = 2;
+                        while(Math.Abs(approximationsRegulaFalsi[i-2].Value - approximationsRegulaFalsi[i - 1].Value) >= precision  && (i < 100))
+                        {
+                            x1 = x0;
+                            x0 = a - secondFunction(a) * (b - a) / (fb - fa);
+                            f0 = secondFunction(x0);
+                            if(fa * f0 < 0)
+                            {
+                                b = x0;
+                                fb = f0;
+                            }
+                            else
+                            {
+                                a = x0;
+                                fa = f0;
+                            }
+                            approximationsRegulaFalsi.Add(new DataGridObjects { StepNumber = i, Value = x0 });
+                            i++;
+                        }
+
                         int k = 0;
                         foreach (var p in approximations)
                         {
@@ -197,8 +303,25 @@ namespace MathProject
                             s1.MarkerType = OxyPlot.MarkerType.Circle;
                             s1.IsVisible = true;
                             s1.Points.Add(new DataPoint(p.Value, 0));
-                            s1.ToolTip = "x" + k;
-                            s1.LabelFormatString = "x" + k;
+                            s1.ToolTip = "x" + p.StepNumber;
+                            s1.LabelFormatString = "x" + p.StepNumber;
+                            this.Model.Series.Add(s1);
+                            k++;
+                        }
+                        this.Model.InvalidatePlot(true);
+
+                        k = 0;
+                        foreach (var p in approximationsRegulaFalsi)
+                        {
+                            var s1 = new LineSeries();
+
+                            s1.Color = OxyColors.LightBlue;
+                            s1.MarkerFill = OxyColors.Red;
+                            s1.MarkerType = OxyPlot.MarkerType.Circle;
+                            s1.IsVisible = true;
+                            s1.Points.Add(new DataPoint(p.Value, 0));
+                            s1.ToolTip = "x" + p.StepNumber;
+                            s1.LabelFormatString = "x" + p.StepNumber;
                             this.Model.Series.Add(s1);
                             k++;
                         }
@@ -209,6 +332,7 @@ namespace MathProject
                         MessageBox.Show("Niepoprawny przedział");
                     }
                     this.results.ItemsSource = approximations;
+                    this.resultsRegulaFalsi.ItemsSource = approximationsRegulaFalsi;
                 }
                 else
                 {
