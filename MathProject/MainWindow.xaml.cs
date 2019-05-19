@@ -73,7 +73,7 @@ namespace MathProject
             this.scrollViewer.Visibility = Visibility.Hidden;
 
             this.Model = new PlotModel { Title = secondFunctionName, PlotType = PlotType.XY };
-            this.Model.Series.Add(new FunctionSeries((x) => (Math.Pow(x, 3) - (2 * x)), -5, 5, 0.1, secondFunctionName));
+            this.Model.Series.Add(new FunctionSeries((x) => (Math.Pow(x, 3) - (2 * x)), -5, 5, 0.0001, secondFunctionName));
             this.Model.Axes.Add(new OxyPlot.Axes.LinearAxis { Position = OxyPlot.Axes.AxisPosition.Bottom, ExtraGridlines = new double[] { 0 }, ExtraGridlineThickness = 1, ExtraGridlineColor = OxyColors.Black, });
             this.Model.Axes.Add(new OxyPlot.Axes.LinearAxis { Position = OxyPlot.Axes.AxisPosition.Left, ExtraGridlines = new double[] { 0 }, ExtraGridlineThickness = 1, ExtraGridlineColor = OxyColors.Black, });
             this.Model.InvalidatePlot(true);
@@ -152,7 +152,7 @@ namespace MathProject
                         while (Math.Abs(approximationsRegulaFalsi[i - 2].Value - approximationsRegulaFalsi[i - 1].Value) >= precision && (i < 100))
                         {
                             x1 = x0;
-                            x0 = a - firstFunction(a) * (b - a) / (fb - fa);
+                            x0 = a - fa * (b - a) / (fb - fa);
                             f0 = firstFunction(x0);
                             if (fa * f0 < 0)
                             {
@@ -277,7 +277,7 @@ namespace MathProject
                         while(Math.Abs(approximationsRegulaFalsi[i-2].Value - approximationsRegulaFalsi[i - 1].Value) >= precision  && (i < 100))
                         {
                             x1 = x0;
-                            x0 = a - secondFunction(a) * (b - a) / (fb - fa);
+                            x0 = a - fa * (b - a) / (fb - fa);
                             f0 = secondFunction(x0);
                             if(fa * f0 < 0)
                             {
@@ -289,6 +289,7 @@ namespace MathProject
                                 a = x0;
                                 fa = f0;
                             }
+
                             approximationsRegulaFalsi.Add(new DataGridObjects { StepNumber = i, Value = x0 });
                             i++;
                         }
@@ -410,7 +411,9 @@ namespace MathProject
                 string name = string.Empty;
                 for (int i = coeff.Length-1; i >= 0; i--)
                 {
-                    if(i != 0 && i != 1)
+                    if(name != "" && name[name.Length - 1] != '+' && coeff[i] > 0)
+                        name = String.Concat(name, '+');
+                    if (i != 0 && i != 1)
                     {
                         if (coeff[i] != 1 && coeff[i] != 0 && coeff[i] != -1)
                             name = String.Concat(name, String.Format("{0}x^{1}", coeff[i], i));
@@ -443,7 +446,7 @@ namespace MathProject
 
                 Func<double, double> func = CreatePolynomialFunction(coeff);
                 this.Model = new PlotModel { Title = name, PlotType = PlotType.XY };
-                this.Model.Series.Add(new FunctionSeries(func, -5, 5, 0.1, name));
+                this.Model.Series.Add(new FunctionSeries(func, -5, 5, 0.0001, name));
                 this.Model.Axes.Add(new OxyPlot.Axes.LinearAxis { Position = OxyPlot.Axes.AxisPosition.Bottom, ExtraGridlines = new double[] { 0 }, ExtraGridlineThickness = 1, ExtraGridlineColor = OxyColors.Black, });
                 this.Model.Axes.Add(new OxyPlot.Axes.LinearAxis { Position = OxyPlot.Axes.AxisPosition.Left, ExtraGridlines = new double[] { 0 }, ExtraGridlineThickness = 1, ExtraGridlineColor = OxyColors.Black, });
                 this.FunctionView.Model = this.Model;
@@ -515,21 +518,26 @@ namespace MathProject
             }
             if (isValid)
             {
-                for (int i = 1; i <= coeff.Length; i++)
+                if (coeff.Length > 1)
                 {
-                    TextBox tmpTxt = (TextBox)this.stackPanel.FindName("a" + i);
-                    coeff[j] = Double.Parse(tmpTxt.Text) * i;
-                    j++;
+                    for (int i = 1; i <= coeff.Length; i++)
+                    {
+                        TextBox tmpTxt = (TextBox)this.stackPanel.FindName("a" + i);
+                        coeff[j] = Double.Parse(tmpTxt.Text) * i;
+                        j++;
+                    }
+                    //Func<double, double> func = CreatePolynomialFunction(coeff);
+                    //return func.Invoke(x);
+                    var coeffTmp = coeff.Reverse().ToList();
+                    double result = coeffTmp[0];
+
+                    for (int i = 1; i < coeffTmp.Count; i++)
+                        result = result * x + coeffTmp[i];
+
+                    return result;
                 }
-                //Func<double, double> func = CreatePolynomialFunction(coeff);
-                //return func.Invoke(x);
-                var coeffTmp = coeff.Reverse().ToList();
-                double result = coeffTmp[0];
-
-                for (int i = 1; i < coeffTmp.Count; i++)
-                    result = result * x + coeffTmp[i];
-
-                return result;
+                else
+                    return 0.0;
             }
             else
             {
@@ -556,28 +564,35 @@ namespace MathProject
             }
             if (isValid)
             {
-                for (int i = 1; i <= coeff.Length; i++)
+                if (coeff.Length > 2)
                 {
-                    TextBox tmpTxt = (TextBox)this.stackPanel.FindName("a" + i);
-                    coeff[j] = Double.Parse(tmpTxt.Text) * i;
-                    j++;
+                    for (int i = 1; i <= coeff.Length; i++)
+                    {
+                        TextBox tmpTxt = (TextBox)this.stackPanel.FindName("a" + i);
+                        coeff[j] = Double.Parse(tmpTxt.Text) * i;
+                        j++;
+                    }
+                    j = 0;
+                    double[] coeffSecDer = new double[coeff.Length - 1];
+                    for (int i = 1; i <= coeffSecDer.Length; i++)
+                    {
+                        coeffSecDer[j] = coeff[i] * i;
+                        j++;
+                    }
+                    //Func<double, double> func = CreatePolynomialFunction(coeffSecDer);
+                    //return func.Invoke(x);
+                    var coeffTmp = coeffSecDer.Reverse().ToList();
+                    double result = coeffTmp[0];
+
+                    for (int i = 1; i < coeffTmp.Count; i++)
+                        result = result * x + coeffTmp[i];
+
+                    return result;
                 }
-                j = 0;
-                double[] coeffSecDer = new double[coeff.Length - 1];
-                for (int i = 1; i <= coeffSecDer.Length; i++)
+                else
                 {
-                    coeffSecDer[j] = coeff[i] * i;
-                    j++;
+                    return 0.0;
                 }
-                //Func<double, double> func = CreatePolynomialFunction(coeffSecDer);
-                //return func.Invoke(x);
-                var coeffTmp = coeffSecDer.Reverse().ToList();
-                double result = coeffTmp[0];
-
-                for (int i = 1; i < coeffTmp.Count; i++)
-                    result = result * x + coeffTmp[i];
-
-                return result;
             }
             else
             {

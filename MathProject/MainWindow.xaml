@@ -18,7 +18,7 @@
         <Button x:Name="calculateBtn" Content="Oblicz" HorizontalAlignment="Left" Margin="13,318,0,0" VerticalAlignment="Top" Width="76" Click="calculateBtn_Click"/>
         <Label Content="Początek przedziału" HorizontalAlignment="Left" Margin="8,212,0,0" VerticalAlignment="Top"/>
         <Label Content="Koniec przedziału" HorizontalAlignment="Left" Margin="10,243,0,0" VerticalAlignment="Top"/>
-        <Label Content="Przybliżenie" HorizontalAlignment="Left" Margin="10,274,0,0" VerticalAlignment="Top"/>
+        <Label Content="Dokładność" HorizontalAlignment="Left" Margin="10,274,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="approximation" HorizontalAlignment="Left" Height="23" Margin="129,277,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="158"/>
         <DataGrid x:Name="results" HorizontalAlignment="Left" Height="193" Margin="13,401,0,0" VerticalAlignment="Top" Width="274"/>
         <DataGrid x:Name="resultsRegulaFalsi" HorizontalAlignment="Left" Height="193" Margin="14,630,0,0" VerticalAlignment="Top" Width="274"/>
