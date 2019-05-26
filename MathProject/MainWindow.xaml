@@ -12,7 +12,7 @@
         <oxy:LineSeries ItemsSource="{Binding Points}" LineStyle="None"  MarkerType="Circle" MarkerSize="5" MarkerFill="Black" HorizontalAlignment="Right" Width="792"/>
         <Label Content="Funkcje" HorizontalAlignment="Left" Margin="72,0,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.082,-0.262"/>
         <Button x:Name="firstFunctionBtn" Content="Wielomian" HorizontalAlignment="Left" Margin="10,26,0,0" VerticalAlignment="Top" Width="76" Click="firstFunctionBtn_Click"/>
-        <Button x:Name="Test2" Content="x^3-2x" HorizontalAlignment="Left" Margin="105,26,0,0" VerticalAlignment="Top" Width="76" Click="Test2_Click"/>
+        <Button x:Name="Test2" Content="cos(x)" HorizontalAlignment="Left" Margin="105,26,0,0" VerticalAlignment="Top" Width="76" Click="Test2_Click"/>
         <TextBox x:Name="beginningOfTheCompartment" HorizontalAlignment="Left" Height="22" Margin="129,212,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="158" />
         <TextBox x:Name="endOfTheCompartment" HorizontalAlignment="Left" Height="22" Margin="129,243,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="158" RenderTransformOrigin="2.47,0.477"/>
         <Button x:Name="calculateBtn" Content="Oblicz" HorizontalAlignment="Left" Margin="13,318,0,0" VerticalAlignment="Top" Width="76" Click="calculateBtn_Click"/>
@@ -26,7 +26,7 @@
         <Label Content="Metoda Regula Falsi" HorizontalAlignment="Left" Margin="231,370,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.25,9.615"/>
         <TextBox x:Name="degreeOfPolynomial" HorizontalAlignment="Left" Height="23" Margin="129,70,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="60" Visibility="Visible" TextChanged="degreeOfPolynomial_TextChanged"/>
         <Label x:Name="degreeOfPolynomialLbl" Content="Stopień wielomianu&#xD;&#xA;" HorizontalAlignment="Left" Margin="8,67,0,0" VerticalAlignment="Top" Height="26"/>
-        <Button x:Name="generateModel" Content="Wygeneruj układ" HorizontalAlignment="Left" Margin="14,178,0,0" VerticalAlignment="Top" Width="108" Click="generateModel_Click"/>
+        <Button x:Name="generateModel" Content="Wygeneruj wykres" HorizontalAlignment="Left" Margin="14,178,0,0" VerticalAlignment="Top" Width="108" Click="generateModel_Click"/>
         <ScrollViewer x:Name="scrollViewer" HorizontalAlignment="Left" Height="50" Margin="22,98,0,0" VerticalAlignment="Top" Width="239" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden">
             <StackPanel x:Name="stackPanel" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Width="240" Height="50"/>
         </ScrollViewer>

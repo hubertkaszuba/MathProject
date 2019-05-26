@@ -26,7 +26,7 @@ namespace MathProject
     {
         public PlotModel Model;
         private const string firstFunctionName = "x^2-2x-1";
-        private const string secondFunctionName = "x^3-2x";
+        private const string secondFunctionName = "cos(x)";
         public IList<DataPoint> Points { get; private set; }
 
         public MainWindow()
@@ -42,17 +42,17 @@ namespace MathProject
 
         public double secondFunction(double x)
         {
-            return (Math.Pow(x, 3) - (2 * x));
+            return /*(Math.Pow(x, 3) - (2 * x));*/Math.Cos(x);
         }
 
         public double derivedSecondFunction(double x)
         {
-            return ((3 * Math.Pow(x,2)) - 2);
+            return /*((3 * Math.Pow(x,2)) - 2);*/-1 * Math.Sin(x);
         }
 
         public double secondaryDerivateSecondFunction(double x)
         {
-            return (6 * x);
+            return /*(6 * x);*/-1 * Math.Cos(x);
         }
 
         private void firstFunctionBtn_Click(object sender, RoutedEventArgs e)
@@ -73,7 +73,7 @@ namespace MathProject
             this.scrollViewer.Visibility = Visibility.Hidden;
 
             this.Model = new PlotModel { Title = secondFunctionName, PlotType = PlotType.XY };
-            this.Model.Series.Add(new FunctionSeries((x) => (Math.Pow(x, 3) - (2 * x)), -5, 5, 0.0001, secondFunctionName));
+            this.Model.Series.Add(new FunctionSeries((x) => Math.Cos(x)/*(Math.Pow(x, 3) - (2 * x))*/, -5, 5, 0.0001, secondFunctionName));
             this.Model.Axes.Add(new OxyPlot.Axes.LinearAxis { Position = OxyPlot.Axes.AxisPosition.Bottom, ExtraGridlines = new double[] { 0 }, ExtraGridlineThickness = 1, ExtraGridlineColor = OxyColors.Black, });
             this.Model.Axes.Add(new OxyPlot.Axes.LinearAxis { Position = OxyPlot.Axes.AxisPosition.Left, ExtraGridlines = new double[] { 0 }, ExtraGridlineThickness = 1, ExtraGridlineColor = OxyColors.Black, });
             this.Model.InvalidatePlot(true);
